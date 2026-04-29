@@ -16,7 +16,7 @@ RSI: {round(rsi,2)}
 
 """
 
-_"🟢" CALL UP_
+("🟢" CALL UP)
 "⏱️" 5 Minute
 
 "📍" Entry: 64250
