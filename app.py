@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from flask import Flask
 import ccxt
 import pandas as pd
 import datetime
+import threading
 
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
