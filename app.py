@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from flask import Flask
-import ccxt
-import pandas as pd
 import datetime
 import threading
 
