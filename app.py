@@ -30,7 +30,7 @@ RSI: {round(rsi,2)}
 - Trend Up
 - Strong Candle
 
-━━━━━━━━━━━━
+
 "🤖" Smart Money Bot
 score = 0
 
@@ -70,7 +70,7 @@ signal = f"""
 - RSI Strong
 - Bullish Candle
 
-━━━━━━━━━━━━
+
 "🤖" Smart Money Bot
 signal = f"""
 "📊" {symbol} ({timeframe})
@@ -90,7 +90,6 @@ signal = f"""
 - RSI Weak
 - Bearish Candle
 
-━━━━━━━━━━━━
 "🤖" Smart Money Bot
 if strength < 70:
     return None
