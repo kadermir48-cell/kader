@@ -1,114 +1,73 @@
 import ccxt
 import pandas as pd
-import ta
-import time
-import requests
+import datetime
 
-# ========= إعدادات =========
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
+# الاتصال بمنصة Binance
+exchange = ccxt.binance()
 
+# إعدادات السوق
 symbol = "EUR/USD"
 timeframe = "5m"
 
-exchange = ccxt.binance()
-
-# ========= إرسال =========
-def ارسال(نص):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": CHAT_ID, "text": نص})
-
-# ========= بيانات =========
-def جلب():
-    data = exchange.fetch_ohlcv(symbol, timeframe, limit=150)
-    df = pd.DataFrame(data, columns=["time","open","high","low","close","volume"])
-    df = df.astype(float)
-    return df
-
-# ========= كشف شمعة قوية =========
-def شمعة_قوية(اخر, قبل):
-    return (اخر["close"] > قبل["open"] and اخر["open"] < قبل["close"])
-
-def شمعة_هابطة(اخر, قبل):
-    return (اخر["close"] < قبل["open"] and اخر["open"] > قبل["close"])
-
-# ========= تحليل احترافي =========
-def تحليل():
-    df = جلب()
-
-    # مؤشرات
-    df["ema50"] = ta.trend.ema_indicator(df["close"], window=50)
-    df["ema200"] = ta.trend.ema_indicator(df["close"], window=200)
-    df["rsi"] = ta.momentum.rsi(df["close"], window=14)
-
-    اخر = df.iloc[-1]
-    قبل = df.iloc[-2]
-    قبل2 = df.iloc[-3]
-
-    # ===== BUY =====
-    if (
-        اخر["ema50"] > اخر["ema200"] and      # ترند
-        قبل["low"] < قبل2["low"] and          # Sweep
-        اخر["close"] > قبل["high"] and        # كسر للأعلى
-        شمعة_قوية(اخر, قبل) and              # تأكيد
-        اخر["rsi"] < 45
-    ):
-        return f"""📈 اشارة شراء احترافية
-
-💱 {symbol}
-⏱️ فريم: 5 دقائق
-
-📊 Trend: صاعد
-💧 Liquidity Sweep: تم
-🔥 تأكيد شمعة: نعم
-📉 RSI: {round(اخر["rsi"],2)}
-
-⏳ مدة الصفقة: 5 دقائق
-"""
-
-    # ===== SELL =====
-    elif (
-        اخر["ema50"] < اخر["ema200"] and
-        قبل["high"] > قبل2["high"] and
-        اخر["close"] < قبل["low"] and
-        شمعة_هابطة(اخر, قبل) and
-        اخر["rsi"] > 55
-    ):
-        return f"""📉 اشارة بيع احترافية
-
-💱 {symbol}
-⏱️ فريم: 5 دقائق
-
-📊 Trend: هابط
-💧 Liquidity Sweep: تم
-🔥 تأكيد شمعة: نعم
-📈 RSI: {round(اخر["rsi"],2)}
-
-⏳ مدة الصفقة: 5 دقائق
-"""
-
-    return None
-
+# لتجنب تكرار نفس الإشارة
 last_signal = None
 
-def تشغيل():
+# =========================
+# 🕒 فلتر وقت التداول (جلسات قوية)
+# =========================
+def وقت_التداول():
+    hour = datetime.datetime.utcnow().hour
+    return 7 <= hour <= 20  # من 7 إلى 20 (لندن + نيويورك)
+
+# =========================
+# 📊 دالة التحليل
+# =========================
+def تحليل():
+
     global last_signal
 
-    while True:
-        try:
-            اشارة = تحليل()
+    try:
 
-            if اشارة and اشارة != last_signal:
-                ارسل(اشارة)
-                last_signal = اشارة
+        # ❌ لا تتداول خارج الأوقات القوية
+        if not وقت_التداول():
+            return None
 
-            time.sleep(300)
+        # 📥 جلب البيانات
+        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=100)
 
-        except Exception as e:
-            print("خطأ:", e)
-            time.sleep(3600)
-import threading
+        df = pd.DataFrame(ohlcv, columns=["time","open","high","low","close","volume"])
 
-if __name__ == "__mai__n":
+        # آخر شمعتين
+        الحالية = df.iloc[-1]
+        السابقة = df.iloc[-2]
+
+        # =====================
+        # 📈 المتوسط المتحرك EMA
+        # =====================
+        df["ema"] = df["close"].ewm(span=50).mean()
+        ema = df["ema"].iloc[-1]
+
+        # =====================
+        # 📊 مؤشر RSI
+        # =====================
+        delta = df["close"].diff()
+        gain = (delta.where(delta > 0, 0)).rolling(14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+
+        rs = gain / loss
+        df["rsi"] = 100 - (100 / (1 + rs))
+        rsi = df["rsi"].iloc[-1]
+
+        # =====================
+        # 💧 اصطياد السيولة (Liquidity Sweep)
+        # =====================
+        اعلى_سابق = df["high"].rolling(10).max().iloc[-2]
+        ادنى_سابق = df["low"].rolling(10).min().iloc[-2]
+
+        sweep_sell = الحالية["high"] > اعلى_سابق and الحالية["close"] < اعلى_سابق
+        sweep_buy = الحالية["low"] < اد
+        if __name__ == "__main__":
     threading.Thread(target=تشغيل).start()
     app.run(host="0.0.0.0", port=10000)
