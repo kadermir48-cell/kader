@@ -21,7 +21,7 @@ RSI: {round(rsi,2)}
 
 "📍" Entry: 64250
 "📈" RSI: 58
-📊 Trend: Bullish
+"📊" Trend: Bullish
 
 "🔥" Strength: 82%
 
