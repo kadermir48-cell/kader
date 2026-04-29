@@ -1,5 +1,4 @@
-flask
-requests
+
 ccxt
 pandas
-gunicorn
+detatime
