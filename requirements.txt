@@ -1,5 +1,6 @@
 flask
 ccxt
 pandas
-datetime
-threading
+gunicorn
+matplotlib
+mplfinance
