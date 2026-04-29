@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 import threading
 
-app = Flask(name)
+app = Flask(__name__)
 
 TOKEN = "8738394543:AAHwgJV-PFgOka2if2jxZi3owox_M8WJFBE"
 CHAT_ID = "6417116422"
