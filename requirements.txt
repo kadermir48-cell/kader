@@ -1,5 +1,5 @@
-flask
-ccxt
-pandas
-gunicorn
-requests
+from flask import Flask
+import ccxt
+import pandas as pd
+import datetime
+import threading
