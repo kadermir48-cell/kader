@@ -8,6 +8,14 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return "ELITE BOT RUNNING 🚀"
+    def send_telegram_message(text):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    data = {
+        "chat_id": CHAT_ID,
+        "text": text
+    }
+    requests.post(url, data=data)
+    send_telegram_message("🚀 البوت شغال بنجاح!")
 
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
