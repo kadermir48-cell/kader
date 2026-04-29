@@ -190,7 +190,7 @@ def run_bot():
 threading.Thread(target=run_bot).start()
 
 # تشغيل السيرفر
-if name == "main":
+if __name__ == "__main__":
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
