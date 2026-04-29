@@ -16,22 +16,22 @@ RSI: {round(rsi,2)}
 
 """
 
-("🟢" CALL UP)
-"⏱️" 5 Minute
+print("🟢" CALL UP)
+("⏱️" 5 Minute)
 
-"📍" Entry: 64250
-"📈" RSI: 58
-"📊" Trend: Bullish
+("📍" Entry: 64250)
+("📈" RSI: 58)
+("📊" Trend: Bullish)
 
-"🔥" Strength: 82%
+("🔥" Strength: 82%)
 
-"📌" السبب:
+("📌" السبب:)
 - Liquidity Sweep
 - Trend Up
 - Strong Candle
 
 
-"🤖" Smart Money Bot
+("🤖" Smart Money Bot)
 score = 0
 
 # اتجاه
@@ -51,46 +51,46 @@ if bullish or bearish:
     score += 25
 
 strength = score
-trend = "Bullish 📈" if current["close"] > ema else "Bearish 📉"
+trend = "Bullish( 📈" if current["close"] > ema else "Bearish 📉" )
 signal = f"""
-📊 {symbol} ({timeframe})
+(📊 {symbol} ({timeframe})
 
-"🟢" CALL UP
-"⏱️" 5 Minute
+("🟢" CALL UP )
+("⏱️" 5 Minute )
 
-"📍" Entry: {round(current['close'],2)}
-"📈" RSI: {round(rsi,2)}
-"📊" Trend: {trend}
+("📍" Entry: {round(current['close'],2)} )
+("📈" RSI: {round(rsi,2)} )
+("📊" Trend: {trend} )
 
-"🔥" Strength: {strength}%
+("🔥" Strength: {strength}% )
 
-"📌" السبب:
+("📌" السبب: )
 - Liquidity Sweep
 - Trend Confirmed
 - RSI Strong
 - Bullish Candle
 
 
-"🤖" Smart Money Bot
+("🤖" Smart Money Bot )
 signal = f"""
-"📊" {symbol} ({timeframe})
+("📊" {symbol} ({timeframe})
 
-"🔴" PUT DOWN
-"⏱️" 5 Minute
+("🔴" PUT DOWN )
+("⏱️" 5 Minute )
 
-"📍" Entry: {round(current['close'],2)}
-"📉" RSI: {round(rsi,2)}
-"📊" Trend: {trend}
+("📍" Entry: {round(current['close'],2)} )
+("📉" RSI: {round(rsi,2)} )
+("📊" Trend: {trend} )
 
-"🔥" Strength: {strength}%
+("🔥" Strength: {strength}% )
 
-"📌" السبب:
+("📌" السبب: )
 - Liquidity Sweep
 - Trend Confirmed
 - RSI Weak
 - Bearish Candle
 
-"🤖" Smart Money Bot
+("🤖" Smart Money Bot )
 if strength < 70:
     return None
 global last_time
