@@ -1,5 +1,5 @@
-from flask import Flask
-import ccxt
-import pandas as pd
-import datetime
-import threading
+flask import Flask
+ccxt
+pandas
+datetime
+threading
