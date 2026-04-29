@@ -5,17 +5,6 @@ from datetime import datetime
 import threading
 
 app = Flask(__name__)
-@app.route('/')
-def home():
-    return "ELITE BOT RUNNING 🚀"
-    def send_telegram_message(text):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    data = {
-        "chat_id": CHAT_ID,
-        "text": text
-    }
-    requests.post(url, data=data)
-    send_telegram_message("🚀 البوت شغال بنجاح!")
 
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
@@ -177,9 +166,31 @@ def run_bot():
 
 threading.Thread(target=run_bot).start()
 
-@app.route("/")
+# الصفحة الرئيسية
+@app.route('/')
 def home():
     return "ELITE BOT RUNNING 🚀"
+
+# دالة ارسال رسالة
+def send_telegram_message(text):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    data = {
+        "chat_id": CHAT_ID,
+        "text": text
+    }
+    requests.post(url, data=data)
+
+# تشغيل البوت
+def run_bot():
+    while True:
+        send_telegram_message("🚀 البوت يعمل الآن!")
+        time.sleep(60)
+
+# تشغيل البوت في الخلفية
+threading.Thread(target=run_bot).start()
+
+# تشغيل السيرفر
+if name == "main":
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
