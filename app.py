@@ -6,7 +6,7 @@ import threading
 
 app = Flask(__name__)
 
-TOKEN = "8738394543:AAHwgJV-PFgOka2if2jxZi3owox_M8WJFBE"
+TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
 
 SYMBOLS = ["BTCUSDT", "ETHUSDT"]
