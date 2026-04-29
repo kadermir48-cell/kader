@@ -6,127 +6,137 @@ TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
 
 exchange = ccxt.binance()
+📊 EUR/USD (5m)
 
-symbol = "BTC/USDT"
-timeframe = "5m"
+🟢 CALL UP
+⏱️ 5 Minute
 
-last_signal = None
+📍 Entry: 64250
+📈 RSI: 58
+📊 Trend: Bullish
 
-# =========================
-# فلتر الجلسات (أفضل وقت تداول)
-# =========================
-def وقت_التداول():
-    hour = datetime.datetime.utcnow().hour
-    return 7 <= hour <= 20
+🔥 Strength: 82%
 
-# =========================
-# تحليل السوق
-# =========================
-def تحليل():
+📌 السبب:
+- Liquidity Sweep
+- Trend Up
+- Strong Candle
 
-    global last_signal
+━━━━━━━━━━━━
+🤖 Smart Money Bot
+score = 0
 
-    try:
-        if not وقت_التداول():
-            return None
+# اتجاه
+if current["close"] > ema:
+    score += 25
 
-        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=100)
-        df = pd.DataFrame(ohlcv, columns=["time","open","high","low","close","volume"])
+# RSI
+if rsi > 55:
+    score += 25
 
-        current = df.iloc[-1]
-        prev = df.iloc[-2]
+# سيولة
+if sweep_buy or sweep_sell:
+    score += 25
 
-        # =====================
-        # EMA (الاتجاه)
-        # =====================
-        df["ema"] = df["close"].ewm(span=50).mean()
-        ema = df["ema"].iloc[-1]
+# شمعة قوية
+if bullish or bearish:
+    score += 25
 
-        # =====================
-        # RSI (الزخم)
-        # =====================
-        delta = df["close"].diff()
-        gain = (delta.where(delta > 0, 0)).rolling(14).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-        rs = gain / loss
-        df["rsi"] = 100 - (100 / (1 + rs))
-        rsi = df["rsi"].iloc[-1]
+strength = score
+trend = "Bullish 📈" if current["close"] > ema else "Bearish 📉"
+signal = f"""
+📊 {symbol} ({timeframe})
 
-        # =====================
-        # Liquidity Sweep
-        # =====================
-        high_prev = df["high"].rolling(10).max().iloc[-2]
-        low_prev = df["low"].rolling(10).min().iloc[-2]
+🟢 CALL UP
+⏱️ 1 Minute
 
-        sweep_sell = current["high"] > high_prev and current["close"] < high_prev
-        sweep_buy = current["low"] < low_prev and current["close"] > low_prev
-
-        # =====================
-        # تأكيد شمعة قوية
-        # =====================
-        bullish = current["close"] > current["open"]
-        bearish = current["close"] < current["open"]
-
-        signal = None
-
-        # =====================
-        # BUY
-        # =====================
-        if (
-            sweep_buy and
-            current["close"] > ema and
-            rsi > 50 and
-            bullish
-        ):
-            signal = f"""
-🟢 BUY (Smart Money)
-
-📊 السبب:
-- كسر سيولة تحت
-- الاتجاه صاعد
-- RSI قوي
-- شمعة صاعدة
-
-💰 السعر: {current['close']}
+📍 Entry: {round(current['close'],2)}
 📈 RSI: {round(rsi,2)}
-"""
+📊 Trend: {trend}
 
-        # =====================
-        # SELL
-        # =====================
-        elif (
-            sweep_sell and
-            current["close"] < ema and
-            rsi < 50 and
-            bearish
-        ):
-            signal = f"""
-🔴 SELL (Smart Money)
+🔥 Strength: {strength}%
 
-📊 السبب:
-- كسر سيولة فوق
-- الاتجاه هابط
-- RSI ضعيف
-- شمعة هابطة
+📌 السبب:
+- Liquidity Sweep
+- Trend Confirmed
+- RSI Strong
+- Bullish Candle
 
-💰 السعر: {current['close']}
+━━━━━━━━━━━━
+🤖 Smart Money Bot
+signal = f"""
+📊 {symbol} ({timeframe})
+
+🔴 PUT DOWN
+⏱️ 5 Minute
+
+📍 Entry: {round(current['close'],2)}
 📉 RSI: {round(rsi,2)}
-"""
+📊 Trend: {trend}
 
-        # منع التكرار
-        if signal == last_signal:
-            return None
+🔥 Strength: {strength}%
 
-        last_signal = signal
-        return signal
+📌 السبب:
+- Liquidity Sweep
+- Trend Confirmed
+- RSI Weak
+- Bearish Candle
 
-    except Exception as e:
-        print("خطأ:", e)
-        return None
-def ارسال_تيليجرام(message):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    data = {
-        "chat_id": CHAT_ID,
-        "text": message
-    }
-    requests.post(url, data=data)
+━━━━━━━━━━━━
+🤖 Smart Money Bot
+if strength < 70:
+    return None
+global last_time
+
+if current["time"] == last_time:
+    return None
+
+last_time = current["time"]
+import time
+
+def تشغيل():
+    while True:
+        signal = تحليل()
+        if signal:
+            ارسال_تيليجرام(signal)
+        time.sleep(30)
+        def رسم_الشارت(df, signal_type):
+
+    df_plot = df.copy()
+    df_plot['time'] = pd.to_datetime(df_plot['time'], unit='ms')
+    df_plot.set_index('time', inplace=True)
+
+    # تحديد لون الإشارة
+    color = 'g' if signal_type == "buy" else 'r'
+
+    apds = []
+
+    # رسم EMA
+    apds.append(mpf.make_addplot(df_plot['close'].ewm(span=50).mean(), color='blue'))
+
+    # حفظ الصورة
+    file_name = "chart.png"
+
+    mpf.plot(
+        df_plot,
+        type='candle',
+        style='charles',
+        addplot=apds,
+        volume=False,
+        savefig=file_name
+    )
+    def ارسال_صورة(file_path, caption):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendPhoto"
+    with open(file_path, 'rb') as photo:
+        requests.post(url, data={
+            "chat_id": CHAT_ID,
+            "caption": caption
+        }, files={"photo": photo})
+        def ارسال_صورة(file_path, caption):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendPhoto"
+    with open(file_path, 'rb') as photo:
+        requests.post(url, data={
+            "chat_id": CHAT_ID,
+            "caption": caption
+        }, files={"photo": photo})
+  
