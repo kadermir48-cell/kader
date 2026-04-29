@@ -67,7 +67,8 @@ def تحليل():
         ادنى_سابق = df["low"].rolling(10).min().iloc[-2]
 
         sweep_sell = الحالية["high"] > اعلى_سابق and الحالية["close"] < اعلى_سابق
-        sweep_buy = الحالية["low"] < اد
+        sweep_buy = الحالية["low"] > ادنى_سابق and الحالية["close"] <ادنى_سابق
+       
         if __name__ == "__main__":
     threading.Thread(target=تشغيل).start()
     app.run(host="0.0.0.0", port=10000)
