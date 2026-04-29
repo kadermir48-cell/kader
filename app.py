@@ -6,7 +6,15 @@ TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
 
 exchange = ccxt.binance()
-📊 EUR/USD (5m)
+signal = f"""
+PAIR: EUR/USD (5m)
+
+BUY SIGNAL
+
+Entry: {round(current['close'],2)}
+RSI: {round(rsi,2)}
+
+"""
 
 🟢 CALL UP
 ⏱️ 5 Minute
