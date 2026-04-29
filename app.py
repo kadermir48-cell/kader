@@ -123,4 +123,10 @@ def تحليل():
     except Exception as e:
         print("خطأ:", e)
         return None
-
+def ارسال_تيليجرام(message):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    data = {
+        "chat_id": CHAT_ID,
+        "text": message
+    }
+    requests.post(url, data=data)
