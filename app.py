@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import ccxt
 import pandas as pd
 import datetime
@@ -48,7 +49,7 @@ signal = f"""
 📊 {symbol} ({timeframe})
 
 🟢 CALL UP
-⏱️ 1 Minute
+⏱️ 5 Minute
 
 📍 Entry: {round(current['close'],2)}
 📈 RSI: {round(rsi,2)}
