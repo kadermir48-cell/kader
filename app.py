@@ -5,6 +5,9 @@ from datetime import datetime
 import threading
 
 app = Flask(__name__)
+@app.route('/')
+def home():
+    return "ELITE BOT RUNNING 🚀"
 
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
