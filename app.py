@@ -8,7 +8,7 @@ import requests
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
 
-symbol = "BTC/USDT"
+symbol = "EUR/USD"
 timeframe = "5m"
 
 exchange = ccxt.binance()
@@ -89,22 +89,26 @@ def تحليل():
 
     return None
 
-# ========= تشغيل =========
+last_signal = None
+
 def تشغيل():
+    global last_signal
+
     while True:
         try:
             اشارة = تحليل()
 
-            if اشارة:
-                ارسال(اشارة)
+            if اشارة and اشارة != last_signal:
+                ارسل(اشارة)
+                last_signal = اشارة
 
             time.sleep(300)
 
         except Exception as e:
             print("خطأ:", e)
             time.sleep(3600)
+import threading
 
-
-    تشغيل()
-if __name__ == "__main__":
+if __name__ == "__mai__n":
+    threading.Thread(target=تشغيل).start()
     app.run(host="0.0.0.0", port=10000)
