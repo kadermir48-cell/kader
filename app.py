@@ -1,21 +1,21 @@
-from flask import Flask, jsonif, requests
-import requests
+from flask import Flask, jsonify, request
+import os
 
 app = Flask(__name__)
 
+TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
+CHAT_ID = "6417116422"
 
-# الصفحة الرئيسية
+# الصفحة الرئيسية للتأكد أن السيرفر يعمل
 @app.route("/")
 def home():
-    return jsonify({"status": "البوت يعمل"})
+    return jsonify({"status": "البوت يعمل بنجاح"})
 
 # استقبال إشارات TradingView
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
 
-TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
-CHAT_ID = "6417116422"
 
 //@version=5
 strategy("SMC + ICT + CRT PRO", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
@@ -122,16 +122,17 @@ if sell
     price = data.get("price")
     reason = data.get("reason")
 
-    print("إشارة جديدة:")
-    print("النوع:", signal)
-    print("السعر:", price)
-    print("السبب:", reason)
+    # طباعة البيانات في سجلات Render (Logs)
+    print(f"إشارة جديدة: {signal} | السعر: {price} | السبب: {reason}")
 
+    # هنا يمكنك إضافة كود لإرسال الإشارة إلى تلجرام أو تنفيذ صفقة حقيقية
+    
     return jsonify({
-        "status": "تم الاستلام",
-        "signal": signal,
-        "price": price
-    })
+        "status": "تم الاستلام بنجاح",
+        "data": data
+    }), 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    # Render يتطلب المنفذ من متغيرات البيئة أو يستخدم 10000 كافتراضي
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
