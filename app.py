@@ -3,17 +3,16 @@ import requests
 
 app = Flask(__name__)
 
+
+# الصفحة الرئيسية
 @app.route("/")
 def home():
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "البوت يعمل"})
 
-@app.route("/signal")
-def signal():
-    return jsonify({
-        "signal": "buy",
-        "reason": "test working"
-    })
-
+# استقبال إشارات TradingView
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.json
 
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
@@ -116,3 +115,23 @@ if buy
 
 if sell
     alert('{"signal":"SELL","price":"' + str.tostring(close) + '","reason":"' + reason_sell + '"}', alert.freq_once_per_bar_close)
+ if not data:
+        return jsonify({"error": "لا توجد بيانات"}), 400
+
+    signal = data.get("signal")
+    price = data.get("price")
+    reason = data.get("reason")
+
+    print("إشارة جديدة:")
+    print("النوع:", signal)
+    print("السعر:", price)
+    print("السبب:", reason)
+
+    return jsonify({
+        "status": "تم الاستلام",
+        "signal": signal,
+        "price": price
+    })
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
