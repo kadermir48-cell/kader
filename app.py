@@ -6,7 +6,7 @@ import datetime
 import threading
 import time
 
-app = Flask(name)
+app = Flask(__name__)
 
 # ===== الإعدادات =====
 exchange = ccxt.binance()
