@@ -18,150 +18,101 @@ def signal():
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
 
-# =========================
-# جلب البيانات
-# =========================
-def get_data():
-    url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=150"
-    data = requests.get(url, timeout=10).json()
+//@version=5
+strategy("SMC + ICT + CRT PRO", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
 
-    df = pd.DataFrame(data, columns=[
-        "time","open","high","low","close","volume",
-        "close_time","qav","trades","tbbav","tbqav","ignore"
-    ])
+// =======================
+// EMA + RSI
+// =======================
+ema = ta.ema(close, 50)
+rsi = ta.rsi(close, 14)
 
-    df["close"] = df["close"].astype(float)
-    df["high"] = df["high"].astype(float)
-    df["low"] = df["low"].astype(float)
+// =======================
+// الاتجاه
+// =======================
+bullish = close > ema
+bearish = close < ema
 
-    return df
+// =======================
+// السيولة (Liquidity Sweep)
+// =======================
+high_prev = ta.highest(high, 10)[1]
+low_prev = ta.lowest(low, 10)[1]
 
-# =========================
-# RSI
-# =========================
-def calculate_rsi(df, period=14):
-    delta = df["close"].diff()
-    gain = delta.clip(lower=0).rolling(period).mean()
-    loss = (-delta.clip(upper=0)).rolling(period).mean()
-    rs = gain / loss
-    return 100 - (100 / (1 + rs))
+sweep_buy = low < low_prev and close > low_prev
+sweep_sell = high > high_prev and close < high_prev
 
-# =========================
-# التحليل
-# =========================
-def analyze():
-    df = get_data()
+// =======================
+// BOS + CHoCH
+// =======================
+bos_up = close > high[2]
+bos_down = close < low[2]
 
-    df["ema"] = df["close"].ewm(span=50).mean()
-    df["rsi"] = calculate_rsi(df)
+// =======================
+// FVG (Fair Value Gap)
+// =======================
+fvg_up = low[1] > high[2]
+fvg_down = high[1] < low[2]
 
-    current = df.iloc[-1]
+// =======================
+// Order Block بسيط
+// =======================
+bull_ob = close[2] < open[2] and close > high[2]
+bear_ob = close[2] > open[2] and close < low[2]
 
-    # Liquidity
-    high_prev = df["high"].rolling(10).max().iloc[-2]
-    low_prev = df["low"].rolling(10).min().iloc[-2]
+// =======================
+// CRT (كسر + رجوع)
+// =======================
+crt_buy = sweep_buy and close > low_prev
+crt_sell = sweep_sell and close < high_prev
 
-    sweep_buy = current["low"] < low_prev and current["close"] > low_prev
-    sweep_sell = current["high"] > high_prev and current["close"] < high_prev
+// =======================
+// إشارات الدخول
+// =======================
+buy =
+    bullish and
+    sweep_buy and
+    bos_up and
+    fvg_up and
+    bull_ob and
+    rsi > 50
 
-    # BOS
-    bos_up = current["close"] > df["high"].iloc[-3]
-    bos_down = current["close"] < df["low"].iloc[-3]
+sell =
+    bearish and
+    sweep_sell and
+    bos_down and
+    fvg_down and
+    bear_ob and
+    rsi < 50
 
-    # FVG
-    fvg_up = df["low"].iloc[-2] > df["high"].iloc[-3]
-    fvg_down = df["high"].iloc[-2] < df["low"].iloc[-3]
+// =======================
+// تنفيذ الصفقات
+// =======================
+if buy
+    strategy.entry("BUY", strategy.long)
 
-    # Order Block بسيط
-    ob_buy = df["low"].iloc[-4]
-    ob_sell = df["high"].iloc[-4]
+if sell
+    strategy.entry("SELL", strategy.short)
 
-    near_ob_buy = current["close"] <= ob_buy * 1.01
-    near_ob_sell = current["close"] >= ob_sell * 0.99
+// =======================
+// رسم الإشارات
+// =======================
+plotshape(buy, title="BUY", location=location.belowbar, color=color.green, style=shape.labelup, text="BUY")
+plotshape(sell, title="SELL", location=location.abovebar, color=color.red, style=shape.labeldown, text="SELL")
 
-    # Trend
-    trend = "صاعد" if current["close"] > current["ema"] else "هابط"
+// =======================
+// معلومات
+// =======================
+plot(ema, color=color.orange, title="EMA 50")
 
-    reasons = []
-    score = 0
+// =======================
+// تنبيهات (Webhook للبوت)
+// =======================
+reason_buy = "SMC + ICT + CRT + FVG + OB"
+reason_sell = "SMC + ICT + CRT + FVG + OB"
 
-    # =========================
-    # تحليل الشروط
-    # =========================
+if buy
+    alert('{"signal":"BUY","price":"' + str.tostring(close) + '","reason":"' + reason_buy + '"}', alert.freq_once_per_bar_close)
 
-    if trend == "صاعد":
-        reasons.append("الاتجاه صاعد")
-        score += 1
-    else:
-        reasons.append("الاتجاه هابط")
-        score += 1
-
-    if current["rsi"] > 50:
-        reasons.append("RSI فوق 50")
-        score += 1
-    else:
-        reasons.append("RSI تحت 50")
-        score += 1
-
-    if sweep_buy:
-        reasons.append("سحب سيولة شراء")
-        score += 1
-
-    if sweep_sell:
-        reasons.append("سحب سيولة بيع")
-        score += 1
-
-    if bos_up:
-        reasons.append("كسر هيكل صاعد")
-        score += 1
-
-    if bos_down:
-        reasons.append("كسر هيكل هابط")
-        score += 1
-
-    if fvg_up:
-        reasons.append("وجود فجوة سعرية صاعدة")
-        score += 1
-
-    if fvg_down:
-        reasons.append("وجود فجوة سعرية هابطة")
-        score += 1
-
-    if near_ob_buy:
-        reasons.append("السعر قريب من منطقة طلب")
-        score += 1
-
-    if near_ob_sell:
-        reasons.append("السعر قريب من منطقة عرض")
-        score += 1
-
-    # =========================
-    # الإشارة
-    # =========================
-    signal = "لا يوجد"
-
-    if sweep_buy and bos_up and fvg_up and trend == "صاعد" and current["rsi"] > 50:
-        signal = "شراء"
-
-    elif sweep_sell and bos_down and fvg_down and trend == "هابط" and current["rsi"] < 50:
-        signal = "بيع"
-
-    return {
-        "السعر": float(current["close"]),
-        "الاتجاه": trend,
-        "RSI": float(current["rsi"]),
-        "الإشارة": signal,
-        "قوة_الصفقة": score,
-        "الأسباب": reasons
-    }
-
-# =========================
-# Routes
-# =========================
-@app.route("/")
-def home():
-    return jsonify({"الحالة": "يعمل"})
-
-@app.route("/signal")
-def signal():
-    return jsonify(analyze())
+if sell
+    alert('{"signal":"SELL","price":"' + str.tostring(close) + '","reason":"' + reason_sell + '"}', alert.freq_once_per_bar_close)
