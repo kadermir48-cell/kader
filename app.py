@@ -1,12 +1,22 @@
 from flask import Flask, jsonify
 import requests
-import pandas as pd
 
 app = Flask(name)
 
-def get_data():
-    url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=100"
-    data = requests.get(url).json()
+@app.route("/")
+def home():
+    return jsonify({"status": "ok"})
+
+@app.route("/signal")
+def signal():
+    return jsonify({
+        "signal": "buy",
+        "reason": "test working"
+    })
+
+
+TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
+CHAT_ID = "6417116422"
 
 # =========================
 # جلب البيانات
@@ -155,4 +165,3 @@ def home():
 @app.route("/signal")
 def signal():
     return jsonify(analyze())
-   
