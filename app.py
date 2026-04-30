@@ -2,15 +2,15 @@ from flask import Flask, jsonify
 import pandas as pd
 import requests
 
-app = Flask(name)
+app = Flask(__name__)
 
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
 CHAT_ID = "6417116422"
 
+
 def get_data():
     url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=100"
-    response = requests.get(url, timeout=10)
-    data = response.json()
+    data = requests.get(url).json()
 
     df = pd.DataFrame(data, columns=[
         "time","open","high","low","close","volume",
@@ -44,57 +44,27 @@ def analyze():
     sweep_buy = current["low"] < low_prev and current["close"] > low_prev
     sweep_sell = current["high"] > high_prev and current["close"] < high_prev
 
-    الاتجاه = "صاعد" if current["close"] > current["ema"] else "هابط"
+    trend = "bullish" if current["close"] > current["ema"] else "bearish"
 
-    الاشارة = "لا يوجد"
+    signal = "none"
 
     if sweep_buy and current["close"] > current["ema"] and current["rsi"] > 50:
-        الاشارة = "شراء"
-
+        signal = "buy"
     elif sweep_sell and current["close"] < current["ema"] and current["rsi"] < 50:
-        الاشارة = "بيع"
+        signal = "sell"
 
     return {
-        "السعر": float(current["close"]),
-        "المتوسط": float(current["ema"]),
-        "RSI": float(current["rsi"]),
-        "الاتجاه": الاتجاه,
-        "الاشارة": الاشارة
+        "price": float(current["close"]),
+        "ema": float(current["ema"]),
+        "rsi": float(current["rsi"]),
+        "trend": trend,
+        "signal": signal
     }
-
-def send_telegram(message):
-    if TOKEN == "" or CHAT_ID == "":
-        return
-
-    url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage"
-    data = {
-        "chat_id": CHAT_ID,
-        "text": message
-    }
-
-    try:
-        requests.post(url, data=data, timeout=10)
-    except:
-        pass
 
 @app.route("/")
 def home():
-    return jsonify({"الحالة": "يعمل"})
+    return jsonify({"status": "running"})
 
 @app.route("/signal")
 def signal():
-    result = analyze()
-
-    message = (
-        "السعر: " + str(result["السعر"]) + "\n" +
-        "الاتجاه: " + result["الاتجاه"] + "\n" +
-        "الاشارة: " + result["الاشارة"] + "\n" +
-        "RSI: " + str(result["RSI"])
-    )
-
-    send_telegram(message)
-
-    return jsonify(result)
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    return jsonify(analyze())
