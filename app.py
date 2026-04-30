@@ -10,7 +10,7 @@ app = Flask(name)
 
 # ===== الإعدادات =====
 exchange = ccxt.binance()
-symbol = "BTC/USDT"
+symbol = "EUR/USD"
 timeframe = "5m"
 
 TOKEN = "8738394543:AAGVtHjCJcNIzIxFjfBeAJEG1CgUMvVPbLI"
@@ -168,6 +168,6 @@ def signal():
 
 
 # ===== تشغيل =====
-if name == "main":
+if __name__ == "__main__":
     threading.Thread(target=bot_loop).start()
     app.run(host="0.0.0.0", port=10000)
